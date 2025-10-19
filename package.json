@@ -1,0 +1,36 @@
+{
+	"name": "@grind-t/lib",
+	"version": "1.0.0",
+	"type": "module",
+	"files": ["dist"],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.umd.cjs",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"scripts": {
+		"check": "tsc --noEmit",
+		"lint": "npx @biomejs/biome check --write ./lib",
+		"test": "node --experimental-transform-types --experimental-test-module-mocks --test",
+		"build": "tsup"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/grind-t/lib.git"
+	},
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/grind-t/lib/issues"
+	},
+	"homepage": "https://github.com/grind-t/lib#readme",
+	"devDependencies": {
+		"@biomejs/biome": "latest",
+		"@microsoft/api-extractor": "latest",
+		"@swc/core": "latest",
+		"@types/node": "latest",
+		"tsup": "latest",
+		"typescript": "latest"
+	}
+}
