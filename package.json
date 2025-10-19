@@ -1,5 +1,5 @@
 {
-	"name": "@grind-t/lib",
+	"name": "@grind-t/russian-bonds",
 	"version": "1.0.0",
 	"type": "module",
 	"files": ["dist"],
@@ -18,13 +18,13 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/grind-t/lib.git"
+		"url": "git+https://github.com/grind-t/russian-bonds.git"
 	},
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/grind-t/lib/issues"
+		"url": "https://github.com/grind-t/russian-bonds/issues"
 	},
-	"homepage": "https://github.com/grind-t/lib#readme",
+	"homepage": "https://github.com/grind-t/russian-bonds#readme",
 	"devDependencies": {
 		"@biomejs/biome": "latest",
 		"@microsoft/api-extractor": "latest",
