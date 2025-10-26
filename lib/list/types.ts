@@ -25,4 +25,7 @@ export const BondSchema = z.object({
 	forQual: z.boolean(),
 });
 
+export const BondListSchema = z.array(BondSchema);
+
 export type Bond = z.infer<typeof BondSchema>;
+export type BondList = z.infer<typeof BondListSchema>;

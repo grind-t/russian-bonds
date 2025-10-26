@@ -14,7 +14,7 @@
 	},
 	"scripts": {
 		"check": "tsc --noEmit",
-		"lint": "npx @biomejs/biome check --write ./lib",
+		"lint": "npx @biomejs/biome check --write ./lib ./scripts",
 		"test": "node --experimental-transform-types --experimental-test-module-mocks --test",
 		"build": "tsup",
 		"export:bonds": "node --env-file=.env --experimental-transform-types ./scripts/exportAllRussianBonds.ts"
