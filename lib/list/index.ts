@@ -2,6 +2,7 @@ import { type KRA, ratingValueToNumber } from "@grind-t/cbr-ratings";
 import {
 	getMoexBondSecurities,
 	getMoexBonds,
+	getMoexBondsMarketData,
 	getMoexBondsMarketYield,
 } from "@grind-t/moex";
 import { toRecord } from "@grind-t/toolkit/array";
@@ -24,13 +25,15 @@ export async function listAllRussianBonds(
 		bonds,
 		moexSecurities,
 		moexBonds,
-		moexYields,
+		moexMarketData,
+		moexMarketYields,
 		bondRatings,
 		bondCompanyRatings,
 	] = await Promise.all([
 		tInvestApi.instruments.bonds({}).then((v) => v.instruments),
 		getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
 		getMoexBonds().then((v) => toRecord(v, (v) => v.ISIN)),
+		getMoexBondsMarketData().then((v) => toRecord(v, (v) => v.SECID)),
 		getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
 		fetch(cbrBondRatingsUrl).then((v) => v.json()),
 		fetch(cbrBondCompanyRaringsUrl).then((v) => v.json()),
@@ -44,13 +47,15 @@ export async function listAllRussianBonds(
 		const moexSecurity = moexSecurities[bond.isin];
 		const moexBond = moexBonds[bond.isin];
 
-		const effectiveYield = moexYields[bond.isin]?.EFFECTIVEYIELD || undefined;
-		const roundedEffectiveYield = effectiveYield
-			? Math.round(effectiveYield * 100) / 100
+		const marketYield = moexMarketData[bond.isin]?.YIELD;
+		const marketYieldFallback = moexBond?.YIELDATPREVWAPRICE;
+		const marketEffectiveYield = moexMarketYields[bond.isin]?.EFFECTIVEYIELD;
+		const ytm = marketYield || marketYieldFallback;
+		const eytm = marketEffectiveYield
+			? Math.round(marketEffectiveYield * 100) / 100
 			: undefined;
-		const prevWAPriceYield = moexBond?.YIELDATPREVWAPRICE || undefined;
 
-		if (!roundedEffectiveYield && !prevWAPriceYield) {
+		if (!ytm && !eytm) {
 			return acc;
 		}
 
@@ -70,10 +75,8 @@ export async function listAllRussianBonds(
 			isin: bond.isin,
 			name: bond.name,
 			maturityDate: bond.maturityDate,
-			yield: {
-				effective: roundedEffectiveYield,
-				prevWAPrice: prevWAPriceYield,
-			},
+			ytm,
+			eytm,
 			rating: {
 				tInvest: bond.riskLevel < 1 ? undefined : 3 - bond.riskLevel,
 				AKRA: getKRARating("AKRA"),

@@ -4,10 +4,8 @@ export const BondSchema = z.object({
 	isin: z.string(),
 	name: z.string(),
 	maturityDate: z.coerce.date().optional(),
-	yield: z.object({
-		effective: z.number().optional(),
-		prevWAPrice: z.number().optional(),
-	}),
+	ytm: z.number().optional(),
+	eytm: z.number().optional(),
 	rating: z.object({
 		tInvest: z.number().optional(),
 		AKRA: z.number().optional(),
