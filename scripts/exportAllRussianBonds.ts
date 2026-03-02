@@ -1,12 +1,12 @@
 import { resolve } from "node:path";
 import { env } from "node:process";
 import { fs } from "zx";
-import { listAllRussianBonds } from "../lib/list/index.ts";
+import { listAllRussianBonds } from "../src/list-all.ts";
 
 const bonds = await listAllRussianBonds(env.T_INVEST_READONLY_TOKEN);
 
 fs.outputJSON(
-	resolve(import.meta.dirname, "..", "exports", "bonds.json"),
-	bonds,
-	{ spaces: "\t" },
+  resolve(import.meta.dirname, "..", "exports", "bonds.json"),
+  bonds,
+  { spaces: "\t" },
 );
