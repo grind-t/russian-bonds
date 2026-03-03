@@ -2104,7 +2104,6 @@
 		"isin": "RU000A109791",
 		"name": "Гарант-Инвест 002Р-10",
 		"maturityDate": "2030-07-30T00:00:00.000Z",
-		"ytm": 0,
 		"eytm": 390.18,
 		"rating": {
 			"tInvest": 1
@@ -10716,28 +10715,6 @@
 		"forQual": false
 	},
 	{
-		"isin": "RU000A1080N5",
-		"name": "Элемент Лизинг 001P-07",
-		"maturityDate": "2026-03-03T00:00:00.000Z",
-		"ytm": 0.6,
-		"rating": {
-			"tInvest": 0,
-			"AKRA": 18,
-			"EXPERT_RA": 18
-		},
-		"nominal": 120,
-		"currency": "rub",
-		"sector": "financial",
-		"emitent": {
-			"id": "1191",
-			"inn": "7706561875"
-		},
-		"isFloater": false,
-		"hasAmortization": true,
-		"hasOffer": false,
-		"forQual": false
-	},
-	{
 		"isin": "RU000A10BTU4",
 		"name": "ГМК Норильский никель БО-001P-12-USD",
 		"maturityDate": "2030-05-24T00:00:00.000Z",
@@ -12231,7 +12208,6 @@
 		"isin": "RU000A106862",
 		"name": "Гарант-Инвест 2Р-06",
 		"maturityDate": "2030-07-30T00:00:00.000Z",
-		"ytm": null,
 		"eytm": 302.84,
 		"rating": {
 			"tInvest": 0
@@ -24452,7 +24428,7 @@
 		"rating": {
 			"tInvest": 2
 		},
-		"nominal": 1449.78,
+		"nominal": 1449.94,
 		"currency": "rub",
 		"sector": "government",
 		"emitent": {

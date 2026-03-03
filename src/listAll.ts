@@ -50,7 +50,7 @@ export async function listAllRussianBonds(
 		const marketYield = moexMarketData[bond.isin]?.YIELD;
 		const marketYieldFallback = moexBond?.YIELDATPREVWAPRICE;
 		const marketEffectiveYield = moexMarketYields[bond.isin]?.EFFECTIVEYIELD;
-		const ytm = marketYield || marketYieldFallback;
+		const ytm = marketYield || marketYieldFallback || undefined;
 		const eytm = marketEffectiveYield
 			? Math.round(marketEffectiveYield * 100) / 100
 			: undefined;

@@ -5,9 +5,9 @@ import { fs } from "zx";
 import { BondListSchema } from "./types.ts";
 
 it("exports/bonds.json entries match schema", async () => {
-  const fileUrl = resolve(import.meta.dirname, "..", "exports", "bonds.json");
-  const bonds = await fs.readJson(fileUrl);
-  const result = BondListSchema.safeParse(bonds);
+	const fileUrl = resolve(import.meta.dirname, "..", "exports", "bonds.json");
+	const bonds = await fs.readJson(fileUrl);
+	const result = BondListSchema.safeParse(bonds);
 
-  assert.ok(result.success, result.error);
+	assert.ok(result.success, result.error);
 });

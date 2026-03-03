@@ -17,7 +17,8 @@
     "lint": "npx @biomejs/biome check --write ./src ./scripts",
     "test": "node --experimental-transform-types --experimental-test-module-mocks --test",
     "build": "tsup",
-    "export:bonds": "node --env-file=.env --experimental-transform-types ./scripts/exportAllRussianBonds.ts"
+    "export:all": "node --env-file=.env --experimental-transform-types ./scripts/exportAll.ts",
+    "export:filtered": "node --experimental-transform-types ./scripts/exportFiltered.ts"
   },
   "repository": {
     "type": "git",
@@ -42,6 +43,7 @@
     "@grind-t/cbr-ratings": "^1.0.2",
     "@grind-t/moex": "^1.0.7",
     "@grind-t/toolkit": "^2.1.0",
+    "dayjs": "^1.11.19",
     "tinkoff-invest-api": "^7.0.1",
     "zod": "^4.1.12"
   }
