@@ -10,9 +10,9 @@ import { Helpers, TinkoffInvestApi } from "tinkoff-invest-api";
 import type { Bond, BondList } from "./types.ts";
 
 const cbrBondRatingsUrl =
-	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bondRatings.json";
+	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bond-ratings.json";
 const cbrBondCompanyRaringsUrl =
-	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bondCompanyRatings.json";
+	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bond-company-ratings.json";
 
 export async function listAllRussianBonds(
 	tInvestApiToken: string,

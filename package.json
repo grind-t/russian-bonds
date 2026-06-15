@@ -35,6 +35,8 @@
     "@swc/core": "latest",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "latest",
+    "flat": "^6.0.1",
+    "hyparquet-writer": "^0.15.6",
     "tsup": "latest",
     "typescript": "latest",
     "zx": "^8.8.5"
@@ -42,7 +44,7 @@
   "dependencies": {
     "@grind-t/cbr-ratings": "^1.0.2",
     "@grind-t/moex": "^1.0.7",
-    "@grind-t/toolkit": "^2.1.0",
+    "@grind-t/toolkit": "^2.4.0",
     "dayjs": "^1.11.19",
     "tinkoff-invest-api": "^7.0.1",
     "zod": "^4.1.12"
