@@ -22,6 +22,7 @@ jobs:
           image-id: fd8old7fperdsthc63l1
           subnet-id: e9b01ud0tr2gklq5g4hi
           public-ip: false
+          memory: 2GB
           ttl: PT1H
 
   e2e:
