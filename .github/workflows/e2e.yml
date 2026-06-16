@@ -46,7 +46,7 @@ jobs:
   stop-runner:
     needs:
       - start-runner
-      - do-the-job
+      - e2e
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
