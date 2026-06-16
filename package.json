@@ -1,52 +1,48 @@
 {
-  "name": "@grind-t/russian-bonds",
-  "version": "1.0.1",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.umd.cjs",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "scripts": {
-    "check": "tsc --noEmit",
-    "lint": "npx @biomejs/biome check --write ./src ./scripts",
-    "test": "node --experimental-transform-types --experimental-test-module-mocks --test",
-    "build": "tsup",
-    "export:all": "node --env-file=.env --experimental-transform-types ./scripts/exportAll.ts",
-    "export:filtered": "node --experimental-transform-types ./scripts/exportFiltered.ts"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/grind-t/russian-bonds.git"
-  },
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/grind-t/russian-bonds/issues"
-  },
-  "homepage": "https://github.com/grind-t/russian-bonds#readme",
-  "devDependencies": {
-    "@biomejs/biome": "latest",
-    "@microsoft/api-extractor": "latest",
-    "@swc/core": "latest",
-    "@types/fs-extra": "^11.0.4",
-    "@types/node": "latest",
-    "flat": "^6.0.1",
-    "hyparquet-writer": "^0.15.6",
-    "tsup": "latest",
-    "typescript": "latest",
-    "zx": "^8.8.5"
-  },
-  "dependencies": {
-    "@grind-t/cbr-ratings": "^1.0.2",
-    "@grind-t/moex": "^1.0.7",
-    "@grind-t/toolkit": "^2.4.0",
-    "dayjs": "^1.11.19",
-    "tinkoff-invest-api": "^7.0.1",
-    "zod": "^4.1.12"
-  }
+	"name": "@grind-t/russian-bonds",
+	"version": "1.0.1",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"lint": "npx @biomejs/biome check --write",
+		"test:unit": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.unit.test.ts\"",
+		"test:e2e": "node --env-file-if-exists=.env --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.e2e.test.ts\"",
+		"test": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.test.ts\"",
+		"check": "npm run typecheck && npm run lint && npm run test",
+		"build": "tsup"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/grind-t/russian-bonds.git"
+	},
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/grind-t/russian-bonds/issues"
+	},
+	"homepage": "https://github.com/grind-t/russian-bonds#readme",
+	"devDependencies": {
+		"@biomejs/biome": "latest",
+		"@microsoft/api-extractor": "latest",
+		"@swc/core": "latest",
+		"@types/node": "latest",
+		"tsup": "latest",
+		"typescript": "latest"
+	},
+	"dependencies": {
+		"@grind-t/cbr-ratings": "^1.0.2",
+		"@grind-t/moex": "^1.0.7",
+		"@grind-t/toolkit": "^2.4.0",
+		"tinkoff-invest-api": "^7.0.1",
+		"zod": "^4.1.12"
+	}
 }
