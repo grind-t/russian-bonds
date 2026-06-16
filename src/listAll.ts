@@ -6,6 +6,7 @@ import {
 	getMoexBondsMarketYield,
 } from "@grind-t/moex";
 import { toRecord } from "@grind-t/toolkit/array";
+import retry from "p-retry";
 import { Helpers, TinkoffInvestApi } from "tinkoff-invest-api";
 import type { Bond, BondList } from "./types.ts";
 
@@ -31,12 +32,18 @@ export async function listAllRussianBonds(
 		bondCompanyRatings,
 	] = await Promise.all([
 		tInvestApi.instruments.bonds({}).then((v) => v.instruments),
-		getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
-		getMoexBonds().then((v) => toRecord(v, (v) => v.ISIN)),
-		getMoexBondsMarketData().then((v) => toRecord(v, (v) => v.SECID)),
-		getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
-		fetch(cbrBondRatingsUrl).then((v) => v.json()),
-		fetch(cbrBondCompanyRaringsUrl).then((v) => v.json()),
+		retry(() =>
+			getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
+		),
+		retry(() => getMoexBonds().then((v) => toRecord(v, (v) => v.ISIN))),
+		retry(() =>
+			getMoexBondsMarketData().then((v) => toRecord(v, (v) => v.SECID)),
+		),
+		retry(() =>
+			getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
+		),
+		retry(() => fetch(cbrBondRatingsUrl).then((v) => v.json())),
+		retry(() => fetch(cbrBondCompanyRaringsUrl).then((v) => v.json())),
 	]);
 
 	return bonds.reduce((acc: Bond[], bond) => {
