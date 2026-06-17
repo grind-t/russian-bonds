@@ -5,9 +5,9 @@ import {
 	getMoexBondsMarketData,
 	getMoexBondsMarketYield,
 } from "@grind-t/moex";
+import { TInvestApi, tInvestDate, tInvestNumber } from "@grind-t/t-invest";
 import { toRecord } from "@grind-t/toolkit/array";
 import retry from "p-retry";
-import { Helpers, TinkoffInvestApi } from "tinkoff-invest-api";
 import type { Bond, BondList } from "./types.ts";
 
 const cbrBondRatingsUrl =
@@ -18,9 +18,7 @@ const cbrBondCompanyRaringsUrl =
 export async function listAllRussianBonds(
 	tInvestApiToken: string,
 ): Promise<BondList> {
-	const tInvestApi = new TinkoffInvestApi({
-		token: tInvestApiToken,
-	});
+	const tInvestApi = new TInvestApi(tInvestApiToken);
 
 	const [
 		bonds,
@@ -75,7 +73,7 @@ export async function listAllRussianBonds(
 		acc.push({
 			isin: bond.isin,
 			name: bond.name,
-			maturityDate: bond.maturityDate,
+			maturityDate: bond.maturityDate && tInvestDate(bond.maturityDate),
 			ytm,
 			eytm,
 			rating: {
@@ -85,7 +83,7 @@ export async function listAllRussianBonds(
 				EXPERT_RA: getKRARating("EXPERT_RA"),
 				NRA: getKRARating("NRA"),
 			},
-			nominal: Helpers.toNumber(bond.nominal),
+			nominal: bond.nominal && tInvestNumber(bond.nominal),
 			currency: bond.nominal?.currency ?? bond.currency,
 			sector: bond.sector,
 			emitent: emitentId

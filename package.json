@@ -19,7 +19,8 @@
 		"test:e2e": "node --env-file-if-exists=.env --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.e2e.test.ts\"",
 		"test": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.test.ts\"",
 		"check": "npm run typecheck && npm run lint && npm run test",
-		"build": "tsup"
+		"build": "tsup",
+		"dev": "node --env-file=.env --experimental-transform-types playground.ts"
 	},
 	"repository": {
 		"type": "git",
@@ -41,9 +42,9 @@
 	"dependencies": {
 		"@grind-t/cbr-ratings": "^1.0.2",
 		"@grind-t/moex": "^1.0.8",
+		"@grind-t/t-invest": "^1.0.0",
 		"@grind-t/toolkit": "^2.4.0",
 		"p-retry": "^8.0.0",
-		"tinkoff-invest-api": "^7.0.1",
 		"zod": "^4.1.12"
 	}
 }
