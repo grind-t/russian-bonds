@@ -40,7 +40,7 @@
 	},
 	"dependencies": {
 		"@grind-t/cbr-ratings": "^1.0.2",
-		"@grind-t/moex": "^1.0.7",
+		"@grind-t/moex": "^1.0.8",
 		"@grind-t/toolkit": "^2.4.0",
 		"p-retry": "^8.0.0",
 		"tinkoff-invest-api": "^7.0.1",

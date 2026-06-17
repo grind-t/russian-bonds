@@ -32,16 +32,10 @@ export async function listAllRussianBonds(
 		bondCompanyRatings,
 	] = await Promise.all([
 		tInvestApi.instruments.bonds({}).then((v) => v.instruments),
-		retry(() =>
-			getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
-		),
-		retry(() => getMoexBonds().then((v) => toRecord(v, (v) => v.ISIN))),
-		retry(() =>
-			getMoexBondsMarketData().then((v) => toRecord(v, (v) => v.SECID)),
-		),
-		retry(() =>
-			getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
-		),
+		getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
+		getMoexBonds().then((v) => toRecord(v, (v) => v.ISIN)),
+		getMoexBondsMarketData().then((v) => toRecord(v, (v) => v.SECID)),
+		getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
 		retry(() => fetch(cbrBondRatingsUrl).then((v) => v.json())),
 		retry(() => fetch(cbrBondCompanyRaringsUrl).then((v) => v.json())),
 	]);
