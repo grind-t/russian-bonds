@@ -1,3 +1,4 @@
+import type { BFOAnalysis } from "@grind-t/bo-nalog";
 import { type KRA, ratingValueToNumber } from "@grind-t/cbr-ratings";
 import {
 	getMoexBondSecurities,
@@ -7,6 +8,7 @@ import {
 } from "@grind-t/moex";
 import { TInvestApi, tInvestDate, tInvestNumber } from "@grind-t/t-invest";
 import { toRecord } from "@grind-t/toolkit/array";
+import { brotliJson } from "@grind-t/toolkit/stream";
 import retry from "p-retry";
 import type { Bond, BondList } from "./types.ts";
 
@@ -14,6 +16,8 @@ const cbrBondRatingsUrl =
 	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bond-ratings.json";
 const cbrBondCompanyRaringsUrl =
 	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bond-company-ratings.json";
+const bfoAnalysisUrl =
+	"https://raw.githubusercontent.com/grind-t/bo-nalog/refs/heads/main/exports/bfo-analysis-latest.json.br";
 
 export async function listAllRussianBonds(
 	tInvestApiToken: string,
@@ -28,6 +32,7 @@ export async function listAllRussianBonds(
 		moexMarketYields,
 		bondRatings,
 		bondCompanyRatings,
+		bfoAnalysis,
 	] = await Promise.all([
 		tInvestApi.instruments.bonds({}).then((v) => v.instruments),
 		getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
@@ -36,6 +41,9 @@ export async function listAllRussianBonds(
 		getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
 		retry(() => fetch(cbrBondRatingsUrl).then((v) => v.json())),
 		retry(() => fetch(cbrBondCompanyRaringsUrl).then((v) => v.json())),
+		retry(() => fetch(bfoAnalysisUrl))
+			.then(brotliJson)
+			.then((v: BFOAnalysis[]) => toRecord(v, (v) => v.inn)),
 	]);
 
 	return bonds.reduce((acc: Bond[], bond) => {
@@ -60,6 +68,7 @@ export async function listAllRussianBonds(
 
 		const emitentId = moexSecurity?.emitent_id.toString();
 		const emitentInn = moexSecurity?.emitent_inn;
+		const analysis = bfoAnalysis[emitentInn];
 
 		const ratings = bondRatings[bond.isin];
 		const companyRatings = bondCompanyRatings[emitentInn];
@@ -90,6 +99,8 @@ export async function listAllRussianBonds(
 				? {
 						id: emitentId,
 						inn: emitentInn,
+						latestBfo: analysis.period,
+						icr: analysis.icr,
 					}
 				: undefined,
 			isFloater: bond.floatingCouponFlag,

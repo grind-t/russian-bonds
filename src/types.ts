@@ -16,7 +16,14 @@ export const BondSchema = z.object({
 	nominal: z.number().optional(),
 	currency: z.string(),
 	sector: z.string(),
-	emitent: z.object({ id: z.string(), inn: z.string() }).optional(),
+	emitent: z
+		.object({
+			id: z.string(),
+			inn: z.string(),
+			latestBfo: z.number(),
+			icr: z.number().nullable(),
+		})
+		.optional(),
 	isFloater: z.boolean(),
 	hasAmortization: z.boolean(),
 	hasOffer: z.boolean(),
