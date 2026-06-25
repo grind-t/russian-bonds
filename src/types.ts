@@ -20,8 +20,8 @@ export const BondSchema = z.object({
 		.object({
 			id: z.string(),
 			inn: z.string(),
-			latestBfo: z.number(),
-			icr: z.number().nullable(),
+			latestBfo: z.number().optional(),
+			icr: z.number().nullish(),
 		})
 		.optional(),
 	isFloater: z.boolean(),

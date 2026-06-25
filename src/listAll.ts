@@ -99,8 +99,8 @@ export async function listAllRussianBonds(
 				? {
 						id: emitentId,
 						inn: emitentInn,
-						latestBfo: analysis.period,
-						icr: analysis.icr,
+						latestBfo: analysis?.period,
+						icr: analysis?.icr,
 					}
 				: undefined,
 			isFloater: bond.floatingCouponFlag,
