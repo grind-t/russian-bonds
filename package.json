@@ -33,13 +33,11 @@
 	"homepage": "https://github.com/grind-t/russian-bonds#readme",
 	"devDependencies": {
 		"@biomejs/biome": "latest",
-		"@grind-t/bo-nalog": "^1.0.2",
 		"@microsoft/api-extractor": "latest",
 		"@swc/core": "latest",
 		"@types/node": "latest",
 		"tsup": "latest",
-		"typescript": "latest",
-		"valibot": "^1.4.1"
+		"typescript": "latest"
 	},
 	"dependencies": {
 		"@grind-t/cbr-ratings": "^1.0.2",
