@@ -4,7 +4,7 @@ import { it } from "node:test";
 
 import z from "zod";
 
-import { listAllRussianBonds } from "./listAll.ts";
+import { listAllRussianBonds } from "./list-all.ts";
 import { BondListSchema } from "./types.ts";
 
 it("bonds match schema", async () => {

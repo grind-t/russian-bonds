@@ -5,6 +5,7 @@
     "typeCheck": true
   },
   "rules": {
+    "unicorn/filename-case": "error",
     "typescript/no-floating-promises": [
       "error",
       {

@@ -1,4 +1,4 @@
-name: e2e
+name: Daily Smoke
 
 on:
   schedule:
@@ -25,7 +25,7 @@ jobs:
           memory: 2GB
           ttl: PT1H
 
-  e2e:
+  run-smoke:
     needs: start-runner
     runs-on: ${{ needs.start-runner.outputs.label }}
     steps:
@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run e2e tests
+      - name: Run smoke
         env:
           T_INVEST_READONLY_TOKEN: ${{ secrets.T_INVEST_READONLY_TOKEN }}
         run: npm run test:e2e
@@ -48,7 +48,7 @@ jobs:
   stop-runner:
     needs:
       - start-runner
-      - e2e
+      - run-smoke
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
