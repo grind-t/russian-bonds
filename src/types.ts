@@ -12,6 +12,7 @@ export const BondSchema = z.object({
 		NKR: z.number().optional(),
 		EXPERT_RA: z.number().optional(),
 		NRA: z.number().optional(),
+		IFRS: z.number().optional()
 	}),
 	nominal: z.number().optional(),
 	currency: z.string(),

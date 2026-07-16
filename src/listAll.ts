@@ -9,11 +9,13 @@ import { TInvestApi, tInvestDate, tInvestNumber } from "@grind-t/t-invest";
 import { toRecord } from "@grind-t/toolkit/array";
 import retry from "p-retry";
 import type { Bond, BondList } from "./types.ts";
+import { brotliJson } from "@grind-t/toolkit/stream";
 
-const cbrBondRatingsUrl =
+const cbrBondsRatingsUrl =
 	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bond-ratings.json";
-const cbrBondCompanyRaringsUrl =
+const cbrEmitentsRaringsUrl =
 	"https://raw.githubusercontent.com/grind-t/cbr-ratings/refs/heads/main/exports/bond-company-ratings.json";
+const ifrsEmitentsRaringsUrl = "https://raw.githubusercontent.com/grind-t/e-disclosure/refs/heads/main/exports/ratings.json.br"
 
 export async function listAllRussianBonds(
 	tInvestApiToken: string,
@@ -27,15 +29,17 @@ export async function listAllRussianBonds(
 		moexMarketData,
 		moexMarketYields,
 		bondRatings,
-		bondCompanyRatings,
+		emitentsRatings,
+		ifrsEmitentsRatings
 	] = await Promise.all([
 		tInvestApi.instruments.bonds({}).then((v) => v.instruments),
 		getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
 		getMoexBonds().then((v) => toRecord(v, (v) => v.ISIN)),
 		getMoexBondsMarketData().then((v) => toRecord(v, (v) => v.SECID)),
 		getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
-		retry(() => fetch(cbrBondRatingsUrl).then((v) => v.json())),
-		retry(() => fetch(cbrBondCompanyRaringsUrl).then((v) => v.json())),
+		retry(() => fetch(cbrBondsRatingsUrl).then((v) => v.json())),
+		retry(() => fetch(cbrEmitentsRaringsUrl).then((v) => v.json())),
+		retry(() => fetch(ifrsEmitentsRaringsUrl)).then(brotliJson)
 	]);
 
 	return bonds.reduce((acc: Bond[], bond) => {
@@ -62,11 +66,11 @@ export async function listAllRussianBonds(
 		const emitentInn = moexSecurity?.emitent_inn;
 
 		const ratings = bondRatings[bond.isin];
-		const companyRatings = bondCompanyRatings[emitentInn];
+		const emitentRatings = emitentsRatings[emitentInn];
 		const getKRARating = (kra: KRA) => {
 			const bondRating = ratings?.[kra]?.ratingValue;
-			const companyRating = companyRatings?.[kra]?.ratingValue;
-			const rating = bondRating || companyRating;
+			const emitentRating = emitentRatings?.[kra]?.ratingValue;
+			const rating = bondRating || emitentRating;
 			return rating ? ratingValueToNumber(rating) : undefined;
 		};
 
@@ -82,6 +86,7 @@ export async function listAllRussianBonds(
 				NKR: getKRARating("NKR"),
 				EXPERT_RA: getKRARating("EXPERT_RA"),
 				NRA: getKRARating("NRA"),
+				IFRS: ifrsEmitentsRatings[emitentInn]
 			},
 			nominal: bond.nominal && tInvestNumber(bond.nominal),
 			currency: bond.nominal?.currency ?? bond.currency,
