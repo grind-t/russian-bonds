@@ -1,50 +1,49 @@
 {
-	"name": "@grind-t/russian-bonds",
-	"version": "1.1.0",
-	"type": "module",
-	"files": [
-		"dist"
-	],
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
-		}
-	},
-	"scripts": {
-		"typecheck": "tsc --noEmit",
-		"lint": "npx @biomejs/biome check --write",
-		"test:unit": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.unit.test.ts\"",
-		"test:e2e": "node --env-file-if-exists=.env --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.e2e.test.ts\"",
-		"test": "node --env-file-if-exists=.env --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.test.ts\"",
-		"check": "npm run typecheck && npm run lint && npm run test",
-		"build": "tsup",
-		"dev": "node --env-file=.env --experimental-transform-types playground.ts"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/grind-t/russian-bonds.git"
-	},
-	"license": "ISC",
-	"bugs": {
-		"url": "https://github.com/grind-t/russian-bonds/issues"
-	},
-	"homepage": "https://github.com/grind-t/russian-bonds#readme",
-	"devDependencies": {
-		"@biomejs/biome": "latest",
-		"@microsoft/api-extractor": "latest",
-		"@swc/core": "latest",
-		"@types/node": "latest",
-		"tsup": "latest",
-		"typescript": "latest"
-	},
-	"dependencies": {
-		"@grind-t/cbr-ratings": "^1.0.2",
-		"@grind-t/moex": "^1.0.8",
-		"@grind-t/t-invest": "^1.0.0",
-		"@grind-t/toolkit": "^2.5.0",
-		"p-retry": "^8.0.0",
-		"zod": "^4.1.12"
-	}
+  "name": "@grind-t/russian-bonds",
+  "version": "1.1.0",
+  "homepage": "https://github.com/grind-t/russian-bonds#readme",
+  "bugs": {
+    "url": "https://github.com/grind-t/russian-bonds/issues"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grind-t/russian-bonds.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "dev": "node --env-file=.env --experimental-transform-types playground.ts",
+    "fmt": "oxfmt",
+    "lint": "oxlint --fix",
+    "test:unit": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.unit.test.ts\"",
+    "test:e2e": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.e2e.test.ts\"",
+    "test": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.test.ts\"",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@grind-t/cbr-ratings": "^1.0.2",
+    "@grind-t/moex": "^1.0.8",
+    "@grind-t/t-invest": "^1.0.0",
+    "@grind-t/toolkit": "^2.5.0",
+    "p-retry": "^8.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "oxfmt": "latest",
+    "oxlint": "latest",
+    "oxlint-tsgolint": "latest",
+    "tsdown": "latest",
+    "typescript": "latest"
+  }
 }
