@@ -6,28 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  start-runner:
-    runs-on: ubuntu-latest
-    outputs:
-      label: ${{ steps.start-yc-runner.outputs.label }}
-      instance-id: ${{ steps.start-yc-runner.outputs.instance-id }}
-    steps:
-      - id: start-yc-runner
-        uses: yc-actions/yc-github-runner@v2
-        with:
-          mode: start
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-          folder-id: b1g606qspnhgrua2djkm
-          image-id: fd8old7fperdsthc63l1
-          subnet-id: e9b01ud0tr2gklq5g4hi
-          public-ip: false
-          memory: 2GB
-          ttl: PT1H
-
   run-smoke:
-    needs: start-runner
-    runs-on: ${{ needs.start-runner.outputs.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60s
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,18 +25,3 @@ jobs:
         env:
           T_INVEST_READONLY_TOKEN: ${{ secrets.T_INVEST_READONLY_TOKEN }}
         run: npm run test:e2e
-
-  stop-runner:
-    needs:
-      - start-runner
-      - run-smoke
-    runs-on: ubuntu-latest
-    if: ${{ always() }}
-    steps:
-      - uses: yc-actions/yc-github-runner@v2
-        with:
-          mode: stop
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-          label: ${{ needs.start-runner.outputs.label }}
-          instance-id: ${{ needs.start-runner.outputs.instance-id }}
