@@ -54,7 +54,7 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     const marketEffectiveYield = moexMarketYields[bond.isin]?.EFFECTIVEYIELD;
     const ytm = marketYield || marketYieldFallback || undefined;
     const eytm = marketEffectiveYield ? Math.round(marketEffectiveYield * 100) / 100 : undefined;
-    const hasOffer = !!moexBond.OFFERDATE;
+    const hasOffer = !!moexBond?.OFFERDATE;
 
     if (!ytm && !eytm) {
       return acc;
