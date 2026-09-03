@@ -75,7 +75,7 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     const getKRAPrediction = (kra: Kra) => {
       const bondPrediction = bondRatings?.[kra]?.prediction;
       const issuerPrediction = issuerRatings?.[kra]?.prediction;
-      return convertPrediction(bondPrediction || issuerPrediction);
+      return convertPrediction(bondPrediction || issuerPrediction) || undefined;
     };
 
     acc.push({
