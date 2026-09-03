@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const PredictionSchema = z.literal(["DEV", "NEG", "STA", "POS"]).nullish();
+
 export const BondSchema = z.object({
   isin: z.string(),
   name: z.string(),
@@ -13,6 +15,13 @@ export const BondSchema = z.object({
     EXPERT_RA: z.number().optional(),
     NRA: z.number().optional(),
     IFRS: z.number().optional(),
+  }),
+  prediction: z.object({
+    AKRA: PredictionSchema,
+    NKR: PredictionSchema,
+    EXPERT_RA: PredictionSchema,
+    NRA: PredictionSchema,
+    IFRS: PredictionSchema,
   }),
   nominal: z.number().optional(),
   currency: z.string(),
@@ -28,3 +37,4 @@ export const BondListSchema = z.array(BondSchema);
 
 export type Bond = z.infer<typeof BondSchema>;
 export type BondList = z.infer<typeof BondListSchema>;
+export type Prediction = z.infer<typeof PredictionSchema>;

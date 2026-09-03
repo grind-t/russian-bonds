@@ -1,4 +1,4 @@
-import { type KRA, ratingValueToNumber } from "@grind-t/cbr-ratings";
+import { convertPrediction, type Kra, ratingValueToNumber } from "@grind-t/cbr-ratings";
 import {
   getMoexBondSecurities,
   getMoexBonds,
@@ -65,11 +65,17 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     const bondRatings = ratingsByBond[bond.isin];
     const issuerRatings = ratingsByIssuer[issuerInn];
 
-    const getKRARating = (kra: KRA) => {
+    const getKRARating = (kra: Kra) => {
       const bondRating = bondRatings?.[kra]?.ratingValue;
       const issuerRating = issuerRatings?.[kra]?.ratingValue;
       const rating = bondRating || issuerRating;
       return rating ? ratingValueToNumber(rating) : undefined;
+    };
+
+    const getKRAPrediction = (kra: Kra) => {
+      const bondPrediction = bondRatings?.[kra]?.prediction;
+      const issuerPrediction = issuerRatings?.[kra]?.prediction;
+      return convertPrediction(bondPrediction || issuerPrediction);
     };
 
     acc.push({
@@ -84,7 +90,14 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
         NKR: getKRARating("NKR"),
         EXPERT_RA: getKRARating("EXPERT_RA"),
         NRA: getKRARating("NRA"),
-        IFRS: ifrsRatingByIssuer[issuerInn],
+        IFRS: ifrsRatingByIssuer[issuerInn]?.value,
+      },
+      prediction: {
+        AKRA: getKRAPrediction("AKRA"),
+        NKR: getKRAPrediction("NKR"),
+        EXPERT_RA: getKRAPrediction("EXPERT_RA"),
+        NRA: getKRAPrediction("NRA"),
+        IFRS: ifrsRatingByIssuer[issuerInn]?.outlook,
       },
       nominal: bond.nominal && tInvestNumber(bond.nominal),
       currency: bond.nominal?.currency ?? bond.currency,
