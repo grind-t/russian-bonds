@@ -49,18 +49,39 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     const moexSecurity = moexSecurities[bond.isin];
     const moexBond = moexBonds[bond.isin];
 
-    const marketYield = moexMarketData[bond.isin]?.YIELD;
-    const marketYieldFallback = moexBond?.YIELDATPREVWAPRICE;
-    const marketEffectiveYield = moexMarketYields[bond.isin]?.EFFECTIVEYIELD;
-    const ytm = marketYield || marketYieldFallback || undefined;
+    if (!moexBond) {
+      console.warn(`Missing moex data for bond ${bond.isin}`);
+      return acc;
+    }
+
+    if (!moexSecurity) {
+      console.warn(`Missing security data for bond ${bond.isin}`);
+      return acc;
+    }
+
+    const marketData = moexMarketData[moexBond.SECID];
+    const marketYield = moexMarketYields[moexBond.SECID];
+
+    const hasOffer = !!moexBond.CALLOPTIONDATE || !!moexBond.PUTOPTIONDATE || !!bond.callDate;
+
+    const ytm =
+      (hasOffer && marketData?.YIELDTOOFFER) ||
+      marketData?.YIELD ||
+      marketData?.YIELDATWAPRICE ||
+      marketData?.CLOSEYIELD ||
+      (bond.floatingCouponFlag && marketData?.YIELDLASTCOUPON) ||
+      moexBond.YIELDATPREVWAPRICE ||
+      undefined;
+    const marketEffectiveYield = marketYield?.EFFECTIVEYIELD || marketYield?.EFFECTIVEYIELDWAPRICE;
     const eytm = marketEffectiveYield ? Math.round(marketEffectiveYield * 100) / 100 : undefined;
-    const hasOffer = !!moexBond?.CALLOPTIONDATE || !!moexBond?.PUTOPTIONDATE || !!bond.callDate;
+
+    const maturityDate = bond.maturityDate && tInvestDate(bond.maturityDate);
 
     if (!ytm && !eytm) {
       return acc;
     }
 
-    const issuerInn = moexSecurity?.emitent_inn;
+    const issuerInn = moexSecurity.emitent_inn;
 
     const bondRatings = ratingsByBond[bond.isin];
     const issuerRatings = ratingsByIssuer[issuerInn];
@@ -81,7 +102,7 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     acc.push({
       isin: bond.isin,
       name: bond.name,
-      maturityDate: bond.maturityDate && tInvestDate(bond.maturityDate),
+      maturityDate,
       ytm,
       eytm,
       rating: {
