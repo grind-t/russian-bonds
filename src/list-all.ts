@@ -32,57 +32,49 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     ifrsRatingByIssuer,
   ] = await Promise.all([
     tInvestApi.instruments.bonds({}).then((v) => v.instruments),
-    getMoexBondSecurities().then((v) => toRecord(v, (v) => v.isin)),
-    getMoexBonds().then((v) => toRecord(v, (v) => v.ISIN)),
-    getMoexBondsMarketData().then((v) => toRecord(v, (v) => v.SECID)),
-    getMoexBondsMarketYield().then((v) => toRecord(v, (v) => v.SECID)),
+    getMoexBondSecurities(),
+    getMoexBonds(),
+    getMoexBondsMarketData(),
+    getMoexBondsMarketYield(),
     fetch(bondRatingsUrl).then(brotliJson),
     fetch(issuerRatingsUrl).then(brotliJson),
     fetch(ifrsRatingsUrl).then(brotliJson),
   ]);
+
+  const moexSecurityByIsin = toRecord(moexSecurities, (v) => v.isin);
+  const moexBondBySecId = Object.groupBy(moexBonds, (v) => v.SECID);
+  const moexMarketDataBySecId = Object.groupBy(moexMarketData, (v) => v.SECID);
+  const moexMarketYieldBySecId = Object.groupBy(moexMarketYields, (v) => v.SECID);
 
   return bonds.reduce((acc: Bond[], bond) => {
     if (!bond.buyAvailableFlag || !bond.apiTradeAvailableFlag) {
       return acc;
     }
 
-    const moexSecurity = moexSecurities[bond.isin];
-    const moexBond = moexBonds[bond.isin];
-
-    if (!moexBond) {
-      console.warn(`Missing moex data for bond ${bond.isin}`);
-      return acc;
-    }
+    const moexSecurity = moexSecurityByIsin[bond.isin];
 
     if (!moexSecurity) {
-      console.warn(`Missing security data for bond ${bond.isin}`);
+      const isSPBExchange = bond.classCode.startsWith("SPB") || bond.classCode.startsWith("PS");
+      if (!isSPBExchange) console.warn(`Missing moex data for bond ${bond.isin}`);
       return acc;
     }
 
-    const marketData = moexMarketData[moexBond.SECID];
-    const marketYield = moexMarketYields[moexBond.SECID];
+    const { secid: secId, primary_boardid: boardId } = moexSecurity;
+    const moexBond = moexBondBySecId[secId]?.find((v) => v.BOARDID === boardId);
+    const marketData = moexMarketDataBySecId[secId]?.find((v) => v.BOARDID === boardId);
+    const marketYield = moexMarketYieldBySecId[secId]?.find((v) => v.BOARDID === boardId);
 
-    const hasOffer = !!moexBond.CALLOPTIONDATE || !!moexBond.PUTOPTIONDATE || !!bond.callDate;
-
+    const isOfz = moexSecurity.type === "ofz_bond";
+    const isFloater = bond.floatingCouponFlag;
+    const hasOffer = !!moexBond?.CALLOPTIONDATE || !!moexBond?.PUTOPTIONDATE || !!bond.callDate;
     const ytm =
-      (hasOffer && marketData?.YIELDTOOFFER) ||
+      ((!isFloater || isOfz) && marketYield?.EFFECTIVEYIELD) ||
       marketData?.YIELD ||
       marketData?.YIELDATWAPRICE ||
-      marketData?.CLOSEYIELD ||
-      (bond.floatingCouponFlag && marketData?.YIELDLASTCOUPON) ||
-      moexBond.YIELDATPREVWAPRICE ||
+      moexBond?.YIELDATPREVWAPRICE ||
       undefined;
-    const marketEffectiveYield = marketYield?.EFFECTIVEYIELD || marketYield?.EFFECTIVEYIELDWAPRICE;
-    const eytm = marketEffectiveYield ? Math.round(marketEffectiveYield * 100) / 100 : undefined;
-
-    const maturityDate = bond.maturityDate && tInvestDate(bond.maturityDate);
-
-    if (!ytm && !eytm) {
-      return acc;
-    }
 
     const issuerInn = moexSecurity.emitent_inn;
-
     const bondRatings = ratingsByBond[bond.isin];
     const issuerRatings = ratingsByIssuer[issuerInn];
 
@@ -102,9 +94,8 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     acc.push({
       isin: bond.isin,
       name: bond.name,
-      maturityDate,
+      maturityDate: tInvestDate(bond.maturityDate) ?? undefined,
       ytm,
-      eytm,
       rating: {
         tInvest: bond.riskLevel < 1 ? undefined : 3 - bond.riskLevel,
         AKRA: getKRARating("AKRA"),
@@ -120,11 +111,11 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
         NRA: getKRAPrediction("NRA"),
         IFRS: ifrsRatingByIssuer[issuerInn]?.outlook,
       },
-      nominal: bond.nominal && tInvestNumber(bond.nominal),
+      nominal: tInvestNumber(bond.nominal) ?? undefined,
       currency: bond.nominal?.currency ?? bond.currency,
       sector: bond.sector,
       issuerInn,
-      isFloater: bond.floatingCouponFlag,
+      isFloater,
       hasAmortization: bond.amortizationFlag,
       hasOffer,
       forQual: bond.forQualInvestorFlag,
