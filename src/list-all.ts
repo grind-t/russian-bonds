@@ -64,15 +64,16 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
     const marketData = moexMarketDataBySecId[secId]?.find((v) => v.BOARDID === boardId);
     const marketYield = moexMarketYieldBySecId[secId]?.find((v) => v.BOARDID === boardId);
 
+    const isOfz = moexSecurity.type === "ofz_bond";
+    const isFloater = bond.floatingCouponFlag;
     const hasOffer = !!moexBond?.CALLOPTIONDATE || !!moexBond?.PUTOPTIONDATE || !!bond.callDate;
     const ytm =
       (hasOffer && marketData?.YIELDTOOFFER) ||
+      (isOfz && isFloater && marketYield?.EFFECTIVEYIELD) ||
       marketData?.YIELD ||
       marketData?.YIELDATWAPRICE ||
       moexBond?.YIELDATPREVWAPRICE ||
       undefined;
-
-    const eytm = marketYield?.EFFECTIVEYIELD || marketYield?.EFFECTIVEYIELDWAPRICE || undefined;
 
     const issuerInn = moexSecurity.emitent_inn;
     const bondRatings = ratingsByBond[bond.isin];
@@ -96,7 +97,6 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
       name: bond.name,
       maturityDate: tInvestDate(bond.maturityDate) ?? undefined,
       ytm,
-      eytm,
       rating: {
         tInvest: bond.riskLevel < 1 ? undefined : 3 - bond.riskLevel,
         AKRA: getKRARating("AKRA"),
@@ -116,7 +116,7 @@ export async function listAllRussianBonds(tInvestApiToken: string): Promise<Bond
       currency: bond.nominal?.currency ?? bond.currency,
       sector: bond.sector,
       issuerInn,
-      isFloater: bond.floatingCouponFlag,
+      isFloater,
       hasAmortization: bond.amortizationFlag,
       hasOffer,
       forQual: bond.forQualInvestorFlag,
