@@ -7,6 +7,7 @@ export const BondSchema = z.object({
   name: z.string(),
   maturityDate: z.coerce.date().optional(),
   ytm: z.number().optional(),
+  eytm: z.number().optional(),
   rating: z.object({
     tInvest: z.number().optional(),
     AKRA: z.number().optional(),
