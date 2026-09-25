@@ -1,13 +1,11 @@
-import { TInvestApi } from "@grind-t/t-invest";
+import type { TInvestApi } from "@grind-t/t-invest";
 
 export async function getAccountBondOperations(
-  tInvestApiToken: string,
+  tInvestApi: TInvestApi,
   accountId: string,
   from?: Date,
   to?: Date,
 ) {
-  const tInvestApi = new TInvestApi(tInvestApiToken);
-
   const items = [];
   let cursor: string | undefined;
   do {
