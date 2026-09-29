@@ -44,17 +44,17 @@ export async function getAccountBondCashFlows(
               type: v.pipe(v.number(), v.integer()),
               payment: v.pipe(
                 v.nonNullish(v.any()),
-                v.transform((v) => tInvestNumber(v)),
+                v.transform((value) => tInvestNumber(value)),
               ),
               quantityDone: v.pipe(v.bigint(), v.transform(Number)),
               date: v.pipe(
                 v.nonNullish(v.any()),
-                v.transform((v) => tInvestDate(v)),
+                v.transform((value) => tInvestDate(value)),
               ),
             }),
           ),
         )
-        .map((v) => ({ ...v, virtual: false })),
+        .map((op) => ({ ...op, virtual: false })),
     ),
     getAccountBonds(tInvestApi, accountId).then((positions) =>
       positions
@@ -64,15 +64,15 @@ export async function getAccountBondCashFlows(
               ticker: v.string(),
               quantity: v.pipe(
                 v.nonNullish(v.any()),
-                v.transform((v) => tInvestNumber(v)),
+                v.transform((value) => tInvestNumber(value)),
               ),
               currentNkd: v.pipe(
                 v.nonNullish(v.any()),
-                v.transform((v) => tInvestNumber(v)),
+                v.transform((value) => tInvestNumber(value)),
               ),
               currentPrice: v.pipe(
                 v.nonNullish(v.any()),
-                v.transform((v) => tInvestNumber(v)),
+                v.transform((value) => tInvestNumber(value)),
               ),
             }),
           ),
