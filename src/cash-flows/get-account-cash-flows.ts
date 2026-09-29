@@ -4,7 +4,7 @@ import * as v from "valibot";
 
 import { getAccountBonds } from "../get-account-bonds.ts";
 import { getAccountBondOperations } from "../operations/get-account-operations.ts";
-import { getQuantityByFullRepayment } from "../operations/get-quantity-by-full-repayment.ts";
+import { getQuantityByPayment } from "../operations/get-quantity-by-payment.ts";
 
 export type BondCashFlow = {
   ticker: string;
@@ -96,7 +96,7 @@ export async function getAccountBondCashFlows(
     const amortization = v.parse(amortizationSchema, amortizations.at(-1));
     // full repayment comes with zero quantity, so derive it from the payment,
     // which is in rubles even for currency bonds
-    repayment.quantityDone = getQuantityByFullRepayment(repayment.payment, amortization.value_rub);
+    repayment.quantityDone = getQuantityByPayment(repayment.payment, amortization.value_rub);
   }
 
   const all = [...executed, ...virtual];
