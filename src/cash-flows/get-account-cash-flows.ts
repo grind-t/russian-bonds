@@ -3,8 +3,8 @@ import { type TInvestApi, tInvestDate, tInvestNumber } from "@grind-t/t-invest";
 import * as v from "valibot";
 
 import { getAccountBonds } from "../get-account-bonds.ts";
-import { getAccountBondOperations } from "../get-account-operations.ts";
-import { getQuantityByFullRepayment } from "./get-quantity-by-full-repayment.ts";
+import { getAccountBondOperations } from "../operations/get-account-operations.ts";
+import { getQuantityByFullRepayment } from "../operations/get-quantity-by-full-repayment.ts";
 
 export type BondCashFlow = {
   ticker: string;
