@@ -4,11 +4,11 @@ import { assertTruthy } from "@grind-t/toolkit/boolean";
 import * as v from "valibot";
 
 import { getAccountBonds } from "../get-account-bonds.ts";
-import { getAccountBondOperations } from "../operations/get-account-operations.ts";
-import { getLastAmortization } from "../operations/get-last-amortization.ts";
-import { getNetQuantitiesByTicker } from "../operations/get-net-quantities-by-ticker.ts";
-import { getQuantityByPayment } from "../operations/get-quantity-by-payment.ts";
-import { BOND_REPAYMENT_FULL } from "../operations/quantity-delta.ts";
+import { getAccountBondOperations } from "./get-account-operations.ts";
+import { getLastAmortization } from "./get-last-amortization.ts";
+import { getNetQuantitiesByTicker } from "./get-net-quantities-by-ticker.ts";
+import { getQuantityByPayment } from "./get-quantity-by-payment.ts";
+import { BOND_REPAYMENT_FULL } from "./quantity-delta.ts";
 
 export type BondCashFlow = {
   ticker: string;
