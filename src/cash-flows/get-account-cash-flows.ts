@@ -1,9 +1,11 @@
-import { getMoexBondAmortizations, getMoexBonds } from "@grind-t/moex";
+import { getMoexBonds } from "@grind-t/moex";
 import { type TInvestApi, tInvestDate, tInvestNumber } from "@grind-t/t-invest";
+import { assertTruthy } from "@grind-t/toolkit/boolean";
 import * as v from "valibot";
 
 import { getAccountBonds } from "../get-account-bonds.ts";
 import { getAccountBondOperations } from "../operations/get-account-operations.ts";
+import { getLastAmortization } from "../operations/get-last-amortization.ts";
 import { getNetQuantitiesByTicker } from "../operations/get-net-quantities-by-ticker.ts";
 import { getQuantityByPayment } from "../operations/get-quantity-by-payment.ts";
 import { BOND_REPAYMENT_FULL } from "../operations/quantity-delta.ts";
@@ -104,29 +106,27 @@ export async function getAccountBondCashFlows(
     ),
   ]);
 
-  // full repayments go first so the loop below derives their quantity
-  // before an earlier operation on the same ticker fills nominalByTicker
-  const operations = [...executedOperations, ...virtualOperations].sort(
-    (a, b) => Number(b.type === BOND_REPAYMENT_FULL) - Number(a.type === BOND_REPAYMENT_FULL),
+  const operations = [...executedOperations, ...virtualOperations];
+
+  const { 0: repaymentOperations = [], 1: restOperations = [] } = Object.groupBy(
+    operations,
+    (op) => (op.type === BOND_REPAYMENT_FULL ? 0 : 1),
   );
 
-  const amortizationSchema = v.object({
-    facevalue: v.number(),
-    faceunit: v.string(),
-    value_rub: v.number(),
-  });
-
-  for (const op of operations) {
-    if (nominalByTicker.has(op.ticker)) continue;
-    const amortizations = await getMoexBondAmortizations(op.ticker);
-    // the last amortization is the final repayment
-    const amortization = v.parse(amortizationSchema, amortizations.at(-1));
+  for (const op of repaymentOperations) {
+    const amortization = await getLastAmortization(op.ticker);
+    assertTruthy(amortization);
     nominalByTicker.set(op.ticker, { value: amortization.facevalue, unit: amortization.faceunit });
-    if (op.type === BOND_REPAYMENT_FULL) {
-      // full repayment comes with zero quantity, so derive it from the payment,
-      // which is in rubles even for currency bonds
-      op.quantityDone = getQuantityByPayment(op.payment, amortization.value_rub);
-    }
+    // full repayment comes with zero quantity, so derive it from the payment,
+    // which is in rubles even for currency bonds
+    op.quantityDone = getQuantityByPayment(op.payment, amortization.value_rub);
+  }
+
+  for (const op of restOperations) {
+    if (nominalByTicker.has(op.ticker)) continue;
+    const amortization = await getLastAmortization(op.ticker);
+    assertTruthy(amortization);
+    nominalByTicker.set(op.ticker, { value: amortization.facevalue, unit: amortization.faceunit });
   }
 
   // history always ends at zero (virtual sell or full repayment), so a nonzero sum
