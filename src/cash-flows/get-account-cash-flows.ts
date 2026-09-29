@@ -5,6 +5,8 @@ import * as v from "valibot";
 import { getAccountBonds } from "../get-account-bonds.ts";
 import { getAccountBondOperations } from "../operations/get-account-operations.ts";
 import { getQuantityByPayment } from "../operations/get-quantity-by-payment.ts";
+import { BOND_REPAYMENT_FULL } from "../operations/quantity-delta.ts";
+import { sumQuantitiesByTicker } from "../operations/sum-quantities-by-ticker.ts";
 
 export type BondCashFlow = {
   ticker: string;
@@ -16,9 +18,6 @@ export type BondCashFlow = {
   virtual: boolean;
 };
 
-export const BUY_TYPES = new Set([15, 16, 17, 20]); // BUY, BUY_CARD, INPUT_SECURITIES, BUY_MARGIN
-export const SELL_TYPES = new Set([3, 7, 18, 22]); // OUTPUT_SECURITIES, SELL_CARD, SELL_MARGIN, SELL
-const BOND_REPAYMENT_FULL = 6;
 const OPERATION_STATE_EXECUTED = 1;
 
 export async function getAccountBondCashFlows(
@@ -103,13 +102,7 @@ export async function getAccountBondCashFlows(
 
   // history always ends at zero (virtual sell or full repayment), so a nonzero sum
   // means the ticker was held before the operations window
-  const netQuantities = new Map<string, number>();
-  for (const { ticker, type, quantityDone } of all) {
-    let q = netQuantities.get(ticker) ?? 0;
-    if (BUY_TYPES.has(type)) q += quantityDone;
-    if (SELL_TYPES.has(type) || type === BOND_REPAYMENT_FULL) q -= quantityDone;
-    netQuantities.set(ticker, q);
-  }
+  const netQuantities = sumQuantitiesByTicker(all);
 
   return all
     .filter((op) => netQuantities.get(op.ticker) === 0)
