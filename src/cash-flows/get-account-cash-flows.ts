@@ -1,12 +1,12 @@
-import { getMoexBondAmortizations } from "@grind-t/moex";
+import { getMoexBondAmortizations, getMoexBonds } from "@grind-t/moex";
 import { type TInvestApi, tInvestDate, tInvestNumber } from "@grind-t/t-invest";
 import * as v from "valibot";
 
 import { getAccountBonds } from "../get-account-bonds.ts";
 import { getAccountBondOperations } from "../operations/get-account-operations.ts";
+import { getNetQuantitiesByTicker } from "../operations/get-net-quantities-by-ticker.ts";
 import { getQuantityByPayment } from "../operations/get-quantity-by-payment.ts";
 import { BOND_REPAYMENT_FULL } from "../operations/quantity-delta.ts";
-import { sumQuantitiesByTicker } from "../operations/sum-quantities-by-ticker.ts";
 
 export type BondCashFlow = {
   ticker: string;
@@ -14,6 +14,7 @@ export type BondCashFlow = {
   description: string;
   type: number;
   value: number;
+  faceUnit: string;
   date: Date;
   virtual: boolean;
 };
@@ -28,7 +29,7 @@ export async function getAccountBondCashFlows(
 ): Promise<BondCashFlow[]> {
   const now = new Date();
 
-  const [executed, virtual] = await Promise.all([
+  const [executedOperations, virtualOperations, nominalByTicker] = await Promise.all([
     getAccountBondOperations(tInvestApi, accountId, from, to).then((operations) =>
       operations
         .filter((op) => op.state === OPERATION_STATE_EXECUTED)
@@ -85,26 +86,54 @@ export async function getAccountBondCashFlows(
           virtual: true,
         })),
     ),
+    getMoexBonds({ primary_board: 1 }).then(
+      (bonds) =>
+        new Map(
+          bonds
+            .map(
+              v.parser(
+                v.object({
+                  SECID: v.string(),
+                  FACEVALUE: v.number(),
+                  FACEUNIT: v.string(),
+                }),
+              ),
+            )
+            .map((bond) => [bond.SECID, { value: bond.FACEVALUE, unit: bond.FACEUNIT }]),
+        ),
+    ),
   ]);
 
-  const amortizationSchema = v.object({ value_rub: v.number() });
+  // full repayments go first so the loop below derives their quantity
+  // before an earlier operation on the same ticker fills nominalByTicker
+  const operations = [...executedOperations, ...virtualOperations].sort(
+    (a, b) => Number(b.type === BOND_REPAYMENT_FULL) - Number(a.type === BOND_REPAYMENT_FULL),
+  );
 
-  for (const repayment of executed.filter((op) => op.type === BOND_REPAYMENT_FULL)) {
-    const amortizations = await getMoexBondAmortizations(repayment.ticker);
+  const amortizationSchema = v.object({
+    facevalue: v.number(),
+    faceunit: v.string(),
+    value_rub: v.number(),
+  });
+
+  for (const op of operations) {
+    if (nominalByTicker.has(op.ticker)) continue;
+    const amortizations = await getMoexBondAmortizations(op.ticker);
     // the last amortization is the final repayment
     const amortization = v.parse(amortizationSchema, amortizations.at(-1));
-    // full repayment comes with zero quantity, so derive it from the payment,
-    // which is in rubles even for currency bonds
-    repayment.quantityDone = getQuantityByPayment(repayment.payment, amortization.value_rub);
+    nominalByTicker.set(op.ticker, { value: amortization.facevalue, unit: amortization.faceunit });
+    if (op.type === BOND_REPAYMENT_FULL) {
+      // full repayment comes with zero quantity, so derive it from the payment,
+      // which is in rubles even for currency bonds
+      op.quantityDone = getQuantityByPayment(op.payment, amortization.value_rub);
+    }
   }
-
-  const all = [...executed, ...virtual];
 
   // history always ends at zero (virtual sell or full repayment), so a nonzero sum
   // means the ticker was held before the operations window
-  const netQuantities = sumQuantitiesByTicker(all);
+  const netQuantities = getNetQuantitiesByTicker(operations);
 
-  return all
+  return operations
     .filter((op) => netQuantities.get(op.ticker) === 0)
     .map((op) => ({
       ticker: op.ticker,
@@ -112,6 +141,7 @@ export async function getAccountBondCashFlows(
       description: op.description,
       type: op.type,
       value: op.payment,
+      faceUnit: nominalByTicker.get(op.ticker)!.unit,
       date: op.date,
       virtual: op.virtual,
     }));
